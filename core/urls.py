@@ -1,7 +1,7 @@
 ﻿from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from core.api.views import CompanyViewSet, DepartmentViewSet, EmployeeViewSet, LeaveBalanceViewSet, LeaveRequestViewSet, LeaveTypeViewSet, OrgUnitViewSet
+from core.api.views import ApprovalDocumentViewSet, CompanyViewSet, DepartmentViewSet, EmployeeViewSet, LeaveBalanceViewSet, LeaveRequestViewSet, LeaveTypeViewSet, OrgUnitViewSet
 
 router = DefaultRouter()
 router.register(r'companies', CompanyViewSet, basename='company')
@@ -11,6 +11,7 @@ router.register(r'employees', EmployeeViewSet, basename='employee')
 router.register(r'leave-types', LeaveTypeViewSet, basename='leave-type')
 router.register(r'leave-balances', LeaveBalanceViewSet, basename='leave-balance')
 router.register(r'leave-requests', LeaveRequestViewSet, basename='leave-request')
+router.register(r'approval-documents', ApprovalDocumentViewSet, basename='approval-document')
 
 urlpatterns = [
     path('', include(router.urls)),

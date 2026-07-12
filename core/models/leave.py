@@ -1,4 +1,4 @@
-from django.db import models
+﻿from django.db import models
 
 from .base import CompanyScopedModel
 
@@ -81,3 +81,32 @@ class LeaveRequest(CompanyScopedModel):
 
     def __str__(self):
         return f"{self.employee.username} - {self.leave_type.name} ({self.status})"
+
+
+class ApprovalDocument(CompanyScopedModel):
+    class DocumentType(models.TextChoices):
+        APPROVAL = 'APPROVAL', 'Approval'
+        REJECTION = 'REJECTION', 'Rejection'
+        CANCELLATION = 'CANCELLATION', 'Cancellation'
+
+    leave_request = models.ForeignKey(
+        LeaveRequest,
+        on_delete=models.CASCADE,
+        related_name='approval_documents',
+    )
+    document_type = models.CharField(max_length=20, choices=DocumentType.choices)
+    file_name = models.CharField(max_length=255)
+    file_path = models.CharField(max_length=500)
+    created_by = models.ForeignKey(
+        'core.Employee',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='created_approval_documents',
+    )
+
+    class Meta:
+        db_table = 'approval_documents'
+
+    def __str__(self):
+        return f"{self.document_type} - {self.file_name}"

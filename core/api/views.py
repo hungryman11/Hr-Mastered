@@ -2,11 +2,11 @@
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from core.models import Company, Department, Employee, LeaveBalance, LeaveRequest, LeaveType, OrgUnit
+from core.models import ApprovalDocument, Company, Department, Employee, LeaveBalance, LeaveRequest, LeaveType, OrgUnit
 from core.onboarding import ApprovalRoutingService, LeaveService, OnboardingService
 from core.permissions import IsCompanyMember, IsHRAdmin
 from core.serializers import CompanySerializer, DepartmentSerializer, EmployeeSerializer, OrgUnitSerializer
-from core.leave_serializers import LeaveBalanceSerializer, LeaveRequestSerializer, LeaveTypeSerializer
+from core.leave_serializers import ApprovalDocumentSerializer, LeaveBalanceSerializer, LeaveRequestSerializer, LeaveTypeSerializer
 
 
 class CompanyViewSet(viewsets.ModelViewSet):
@@ -161,3 +161,16 @@ class LeaveRequestViewSet(viewsets.ModelViewSet):
         except Exception as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(self.get_serializer(leave_request).data)
+
+
+class ApprovalDocumentViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = ApprovalDocumentSerializer
+    lookup_field = 'uuid'
+    permission_classes = [IsCompanyMember]
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = ApprovalDocument.objects.select_related('company', 'leave_request', 'created_by')
+        if user.is_superuser:
+            return queryset
+        return queryset.filter(company=user.company)

@@ -1,6 +1,6 @@
 ﻿from rest_framework import serializers
 
-from core.models import LeaveBalance, LeaveRequest, LeaveType
+from core.models import ApprovalDocument, LeaveBalance, LeaveRequest, LeaveType
 
 
 class LeaveTypeSerializer(serializers.ModelSerializer):
@@ -58,3 +58,10 @@ class LeaveRequestSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'days_requested': 'Days requested must be greater than zero.'})
 
         return attrs
+
+
+class ApprovalDocumentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ApprovalDocument
+        fields = ('uuid', 'company', 'leave_request', 'document_type', 'file_name', 'file_path', 'created_by', 'created_at', 'updated_at')
+        read_only_fields = ('uuid', 'file_name', 'file_path', 'created_at', 'updated_at')

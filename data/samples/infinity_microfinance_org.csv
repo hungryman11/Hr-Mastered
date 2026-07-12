@@ -1,0 +1,23 @@
+﻿email,full_name,manager_email,org_path,department,role,username
+board.chairman@infinity.com,Board Chairman,,Board of Directors,Board of Directors,HR_ADMIN,boardchairman
+md.ceo@infinity.com,MD CEO,board.chairman@infinity.com,Board of Directors > Executive Office,Executive Office,HR_ADMIN,mdceo
+financial.control@infinity.com,Financial Control Head,md.ceo@infinity.com,Board of Directors > Executive Office > Financial Control,Financial Control,MANAGER,fincontrolhead
+finance.officer@infinity.com,Finance Officer,financial.control@infinity.com,Board of Directors > Executive Office > Financial Control,Financial Control,EMPLOYEE,financeofficer
+head.treasury@infinity.com,Head Treasury,financial.control@infinity.com,Board of Directors > Executive Office > Financial Control,Financial Control,MANAGER,headtreasury
+operations.head@infinity.com,Operations Head,md.ceo@infinity.com,Board of Directors > Executive Office > Operations,Operations,MANAGER,operationshead
+strategy.research@infinity.com,Strategy Research Lead,operations.head@infinity.com,Board of Directors > Executive Office > Operations > Strategy Research,Operations,EMPLOYEE,strategyresearch
+customer.service@infinity.com,Customer Service Lead,operations.head@infinity.com,Board of Directors > Executive Office > Operations > Customer Service,Operations,EMPLOYEE,customerservice
+credit.marketing@infinity.com,Credit & Marketing Head,md.ceo@infinity.com,Board of Directors > Executive Office > Credit & Marketing,Credit & Marketing,MANAGER,creditmarketing
+business.development@infinity.com,Business Development Lead,credit.marketing@infinity.com,Board of Directors > Executive Office > Credit & Marketing > Business Development,Credit & Marketing,EMPLOYEE,businessdevelopment
+branch.heads@infinity.com,Branch Heads Lead,credit.marketing@infinity.com,Board of Directors > Executive Office > Credit & Marketing > Branch Heads,Credit & Marketing,MANAGER,branchheads
+retail.banking@infinity.com,Retail Banking Lead,branch.heads@infinity.com,Board of Directors > Executive Office > Credit & Marketing > Branch Heads > Retail Banking,Credit & Marketing,EMPLOYEE,retailbanking
+risk.compliance@infinity.com,Risk & Compliance Head,md.ceo@infinity.com,Board of Directors > Executive Office > Risk & Compliance,Risk & Compliance,MANAGER,riskcompliance
+credit.admin@infinity.com,Credit Admin,risk.compliance@infinity.com,Board of Directors > Executive Office > Risk & Compliance,Risk & Compliance,EMPLOYEE,creditadmin
+loan.monitoring@infinity.com,Loan Monitoring Officer,risk.compliance@infinity.com,Board of Directors > Executive Office > Risk & Compliance,Risk & Compliance,EMPLOYEE,loanmonitoring
+human.resources@infinity.com,Human Resources Head,md.ceo@infinity.com,Board of Directors > Executive Office > Human Resources,Human Resources,MANAGER,humanresources
+training.admin@infinity.com,Training & Admin Lead,human.resources@infinity.com,Board of Directors > Executive Office > Human Resources > Training & Admin,Human Resources,EMPLOYEE,trainingadmin
+branch.supervisors@infinity.com,Branch Supervisors Lead,human.resources@infinity.com,Board of Directors > Executive Office > Human Resources > Branch Supervisors,Human Resources,EMPLOYEE,branchsupervisors
+information.technology@infinity.com,IT & Maintenance Head,md.ceo@infinity.com,Board of Directors > Executive Office > Information Technology & Maintenance,Information Technology & Maintenance,MANAGER,informationtechnology
+echannels@infinity.com,E-Channels Lead,information.technology@infinity.com,Board of Directors > Executive Office > Information Technology & Maintenance > E-Channels,Information Technology & Maintenance,EMPLOYEE,echannels
+internal.audit@infinity.com,Internal Audit Head,board.chairman@infinity.com,Board of Directors > Executive Office > Internal Audit,Internal Audit,MANAGER,internalaudit
+audit.officers@infinity.com,Audit Officer,internal.audit@infinity.com,Board of Directors > Executive Office > Internal Audit,Internal Audit,EMPLOYEE,auditofficer

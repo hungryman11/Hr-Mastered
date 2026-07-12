@@ -1,6 +1,6 @@
 ﻿from django.contrib import admin
 
-from core.models import Company, Department, Employee, LeaveBalance, LeaveRequest, LeaveType, OrgUnit
+from core.models import ApprovalDocument, Company, Department, Employee, LeaveBalance, LeaveRequest, LeaveType, OrgUnit
 
 
 @admin.register(Company)
@@ -50,3 +50,10 @@ class LeaveRequestAdmin(admin.ModelAdmin):
     list_display = ('employee', 'leave_type', 'start_date', 'end_date', 'status', 'company')
     list_filter = ('company', 'status', 'leave_type')
     search_fields = ('employee__username', 'employee__first_name', 'employee__last_name', 'reason')
+
+
+@admin.register(ApprovalDocument)
+class ApprovalDocumentAdmin(admin.ModelAdmin):
+    list_display = ('leave_request', 'document_type', 'file_name', 'company', 'created_by', 'created_at')
+    list_filter = ('company', 'document_type')
+    search_fields = ('leave_request__employee__username', 'file_name')
