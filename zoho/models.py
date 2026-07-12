@@ -1,9 +1,18 @@
 from django.db import models
+
 from core.models.base import CompanyScopedModel
+
 
 class WorkDriveFolder(CompanyScopedModel):
     folder_name = models.CharField(max_length=255)
     zoho_folder_id = models.CharField(max_length=150, unique=True)
+    employee = models.OneToOneField(
+        'core.Employee',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='workdrive_folder',
+    )
 
     class Meta:
         db_table = 'workdrive_folders'
@@ -16,12 +25,12 @@ class EmployeeDocument(CompanyScopedModel):
     employee = models.ForeignKey(
         'core.Employee',
         on_delete=models.CASCADE,
-        related_name='documents'
+        related_name='documents',
     )
     folder = models.ForeignKey(
         WorkDriveFolder,
         on_delete=models.CASCADE,
-        related_name='documents'
+        related_name='documents',
     )
     document_name = models.CharField(max_length=255)
     document_type = models.CharField(max_length=100)
@@ -31,7 +40,7 @@ class EmployeeDocument(CompanyScopedModel):
         'core.Employee',
         on_delete=models.SET_NULL,
         null=True,
-        related_name='uploaded_documents'
+        related_name='uploaded_documents',
     )
 
     class Meta:
@@ -51,7 +60,7 @@ class EmailLog(CompanyScopedModel):
         'core.Employee',
         on_delete=models.SET_NULL,
         null=True,
-        related_name='sent_emails'
+        related_name='sent_emails',
     )
 
     class Meta:
