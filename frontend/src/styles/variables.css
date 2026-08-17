@@ -1,0 +1,22 @@
+:root {
+  --color-primary: hsl(225 70% 60%);
+  --color-primary-glow: hsl(225 70% 60% / 0.3);
+  --color-surface: hsl(222 20% 10%);
+  --color-surface-raised: hsl(222 18% 14%);
+  --color-surface-glass: hsl(222 18% 18% / 0.7);
+  --color-border: hsl(222 15% 25%);
+  --color-text: hsl(210 20% 95%);
+  --color-text-muted: hsl(210 15% 60%);
+  --color-success: hsl(142 70% 45%);
+  --color-warning: hsl(38 90% 55%);
+  --color-danger: hsl(0 72% 55%);
+  --color-pending: hsl(225 15% 40%);
+  
+  --radius-card: 16px;
+  --radius-btn: 8px;
+  --shadow-card: 0 8px 32px hsl(222 30% 5% / 0.6);
+  --shadow-glow: 0 0 15px var(--color-primary-glow);
+  
+  --transition-fast: 150ms ease;
+  --transition-normal: 200ms ease;
+}

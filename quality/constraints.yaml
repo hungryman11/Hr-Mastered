@@ -1,0 +1,170 @@
+version: 1
+contracts:
+  zoho_login_callback:
+    input:
+      type: object
+      required: [code, state]
+      additionalProperties: false
+      properties:
+        code: {type: string, minLength: 1}
+        state: {type: string, minLength: 32}
+    output:
+      type: object
+      required: [detail, employee]
+      properties:
+        detail: {type: string}
+        employee: {type: object}
+  leave_request_create:
+    input:
+      type: object
+      required: [leave_type, start_date, end_date, reason, contact_during_leave, emergency_contact_name, emergency_contact_phone, handover_contact, handover_notes]
+      properties:
+        leave_type: {type: string, format: uuid}
+        start_date: {type: string, format: date}
+        end_date: {type: string, format: date}
+        days_requested: {type: number, readOnly: true, description: Calculated from Monday-Friday working days.}
+        reason: {type: string, minLength: 1, maxLength: 5000}
+        document: {type: string, contentEncoding: base64, description: Optional supporting evidence; the HR platform always generates the primary leave form.}
+        contact_during_leave: {type: string, minLength: 1, maxLength: 255}
+        emergency_contact_name: {type: string, minLength: 1, maxLength: 255}
+        emergency_contact_phone: {type: string, minLength: 1, maxLength: 50}
+        handover_contact: {type: string, minLength: 1, maxLength: 255}
+        handover_notes: {type: string, minLength: 1, maxLength: 5000}
+    output:
+      type: object
+      required: [uuid, status, approval_steps]
+      properties:
+        uuid: {type: string, format: uuid}
+        status: {type: string, enum: [PENDING, APPROVED, REJECTED, CANCELLED]}
+        approval_steps:
+          type: array
+          minItems: 4
+          items:
+            type: object
+            required: [uuid, sequence, stage, approver, status]
+            properties:
+              uuid: {type: string, format: uuid}
+              sequence: {type: integer, minimum: 1}
+              stage: {type: string, enum: [ADMIN, SUPERVISOR, HOD, HR]}
+              approver: {type: integer}
+              status: {type: string, enum: [PENDING, APPROVED, REJECTED]}
+              decision_reason: {type: string}
+  leave_approval_decision:
+    input:
+      type: object
+      required: [reason]
+      additionalProperties: false
+      properties:
+        reason: {type: string, minLength: 1, maxLength: 5000}
+    output:
+      type: object
+      required: [uuid, status, approval_steps]
+      properties:
+        uuid: {type: string, format: uuid}
+        status: {type: string, enum: [PENDING, APPROVED, REJECTED, CANCELLED]}
+        approval_steps: {type: array}
+  delivery_job:
+    output:
+      type: object
+      required: [uuid, kind, status, attempts, available_at, created_at]
+      properties:
+        uuid: {type: string, format: uuid}
+        kind: {type: string, enum: [EMAIL, APPROVAL_DOCUMENT]}
+        status: {type: string, enum: [PENDING, PROCESSING, SUCCEEDED, FAILED]}
+        attempts: {type: integer, minimum: 0}
+        last_error: {type: string}
+        available_at: {type: string, format: date-time}
+        locked_at: {type: [string, 'null'], format: date-time}
+        completed_at: {type: [string, 'null'], format: date-time}
+  company_holiday:
+    input:
+      type: object
+      required: [name, date]
+      properties:
+        name: {type: string, minLength: 1, maxLength: 150}
+        date: {type: string, format: date}
+        is_national: {type: boolean}
+  company_work_calendar:
+    input:
+      type: object
+      required: [working_weekdays, include_nigerian_public_holidays]
+      properties:
+        working_weekdays:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items: {type: integer, minimum: 0, maximum: 6}
+          description: Python weekday numbers; Monday is 0 and Sunday is 6.
+        include_nigerian_public_holidays: {type: boolean, default: true}
+    output:
+      type: object
+      required: [uuid, working_weekdays, include_nigerian_public_holidays]
+      properties:
+        uuid: {type: string, format: uuid}
+        working_weekdays: {type: array}
+        include_nigerian_public_holidays: {type: boolean}
+  payroll_profile_create:
+    input:
+      type: object
+      required: [employee, employee_number, base_salary, hire_date]
+      properties:
+        employee: {type: string, format: uuid}
+        employee_number: {type: string, minLength: 1, maxLength: 50}
+        base_salary: {type: number, minimum: 0}
+        bank_account_ciphertext: {type: string}
+        bank_code: {type: string, minLength: 1, maxLength: 10}
+        pension_id_ciphertext: {type: string}
+        tax_id_ciphertext: {type: string}
+        employment_status: {type: string, enum: [ACTIVE, INACTIVE, SUSPENDED, TERMINATED]}
+        hire_date: {type: string, format: date}
+        termination_date: {type: [string, 'null'], format: date}
+        data_processing_consented_at: {type: [string, 'null'], format: date-time}
+  loan_product_create:
+    input:
+      type: object
+      required: [name]
+      properties:
+        name: {type: string, minLength: 1, maxLength: 150}
+        is_active: {type: boolean}
+  loan_case_create:
+    input:
+      type: object
+      required: [applicant, loan_product, requested_amount, purpose, repayment_months, collateral_type, collateral_value, collateral_details]
+      properties:
+        applicant: {type: string, format: uuid}
+        loan_product: {type: string, format: uuid}
+        requested_amount: {type: number, minimum: 0.01}
+        purpose: {type: string, minLength: 1}
+        repayment_months: {type: integer, minimum: 1}
+        collateral_type: {type: string, minLength: 1, maxLength: 100}
+        collateral_value: {type: number, minimum: 0.01}
+        collateral_details: {type: string, minLength: 1}
+  loan_checklist_item_verify:
+    input:
+      type: object
+      required: [status]
+      additionalProperties: false
+      properties:
+        status: {type: string, enum: [RECEIVED, MISSING, REJECTED, NOT_APPLICABLE]}
+        note: {type: string}
+        evidence_reference: {type: string}
+validation_rules:
+  - A leave request route must contain ADMIN, SUPERVISOR, HOD, and HR stages in that order.
+  - Only an assigned member of the earliest pending stage may make a decision.
+  - Every decision requires a non-blank reason.
+  - A non-pending leave request cannot be approved or rejected.
+  - A non-HR employee may access only their own leave balance, documents, and leave requests plus requests assigned to them for approval.
+  - Email logs and organisation management operations require HR administrator privileges.
+  - Zoho OAuth callbacks must use the server-issued, single-use state and configured redirect URI.
+  - Zoho login may authenticate only a pre-provisioned active employee.
+  - Every leave request generates a DOCX from the required questionnaire answers and must receive a WorkDrive file ID before it is persisted.
+  - A supporting PDF, Word, PNG, or JPEG document is optional unless the selected leave type requires it.
+  - Only HR administrators may inspect or retry delivery jobs.
+  - A worker atomically leases one due job at a time; stale PROCESSING jobs are reclaimable after the configured lease expires.
+  - Failed deliveries retry with exponential backoff (1 then 2 minutes) and remain visible as FAILED after the third failed attempt.
+  - A final delivery failure queues one operations alert when DELIVERY_FAILURE_ALERT_EMAIL is configured; alert jobs never alert on their own failure.
+  - Leave duration is calculated using the company work calendar and may not exceed 15 working days for every leave type.
+  - Nigerian public holidays are excluded by default; HR may configure the work week, national-holiday policy, and company-specific closure days.
+  - Supporting-document requirements are configured per leave type and are enforced on initial requests and amendments.
+  - An assigned current approver may request amendment with a reason; only the requester may submit the amendment, which starts a new approval round.
+  - A leave route must contain a distinct active Admin, Supervisor, HOD, and HR approver; the requester cannot approve their own request.

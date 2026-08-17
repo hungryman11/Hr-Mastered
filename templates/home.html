@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Platform Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+        .wrap {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 48px 24px 72px;
+        }
+        .card {
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+        }
+        h1 { font-size: 2rem; margin-top: 0; }
+        .pill {
+            display: inline-block;
+            background: #38bdf8;
+            color: #082f49;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 20px; }
+        .panel { background: #111827; border: 1px solid #475569; border-radius: 12px; padding: 16px; }
+        code { background: #1f2937; padding: 2px 6px; border-radius: 6px; }
+        a { color: #7dd3fc; }
+        .small { color: #cbd5e1; font-size: 0.95rem; }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="card">
+            <div class="pill">Presentation-ready demo</div>
+            <h1>HR Platform Demo</h1>
+            <p>This is a local Django + PostgreSQL + Zoho mock demo you can present to people without needing real Zoho credentials.</p>
+
+            <div class="grid">
+                <div class="panel">
+                    <h3>1. App access</h3>
+                    <p>Admin login: <code>admin / Admin123!</code></p>
+                    <p><a href="/admin/">Open admin panel</a></p>
+                </div>
+                <div class="panel">
+                    <h3>2. Zoho Mock Mode</h3>
+                    <p>Mock mode is currently: <strong>{{ mock_mode|yesno:"On,Off" }}</strong></p>
+                    <p><a href="/zoho-demo/">View Zoho demo JSON</a></p>
+                </div>
+                <div class="panel">
+                    <h3>3. Secure sign-in</h3>
+                    <p>Zoho credentials and access tokens are never displayed in this application.</p>
+                    <p class="small">Use the HR sign-in flow to authenticate a pre-provisioned employee account.</p>
+                </div>
+            </div>
+
+            <p style="margin-top: 24px;">Use this page as the opening slide for the demo. It shows the app, the admin area, and the Zoho mock integration in one place.</p>
+        </div>
+    </div>
+</body>
+</html>

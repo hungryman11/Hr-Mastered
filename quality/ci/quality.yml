@@ -1,0 +1,29 @@
+name: Quality
+
+on: [push, pull_request]
+
+env:
+  SECRET_KEY: ci-test-secret
+  DEBUG: "true"
+  SECURE_SSL_REDIRECT: "false"
+
+jobs:
+  test-type-coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r requirements.txt coverage mypy django-stubs djangorestframework-stubs
+      - name: Test suite
+        run: coverage run manage.py test
+      - name: Coverage gate
+        run: coverage report --fail-under=80
+      - name: Type check
+        run: mypy core zoho --ignore-missing-imports --check-untyped-defs
+      - name: Failure guidance
+        if: failure()
+        run: |
+          echo 'Tests failed: regenerate the affected implementation with the test error message.'
+          echo 'Type checking failed: add explicit type hints to the affected prompt and implementation.'
+          echo 'Coverage dropped: add boundary and error-path tests before merging.'

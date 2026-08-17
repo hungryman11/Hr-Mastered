@@ -1,0 +1,63 @@
+.balanceCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-width: 200px;
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--color-text);
+}
+
+.chartContainer {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.chart {
+  transform: rotate(-90deg);
+}
+
+.chartBackground {
+  fill: none;
+  stroke: var(--color-surface-raised);
+}
+
+.chartProgress {
+  fill: none;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s ease-in-out, stroke 0.3s ease;
+}
+
+.chartText {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.remaining {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.allocated {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.daysText {
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}

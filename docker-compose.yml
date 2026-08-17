@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: hr_postgres_dev
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-hr_platform_db}
+      POSTGRES_USER: ${POSTGRES_USER:-hr_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ChangeThisInDev123!}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  web:
+    build: .
+    command: sh -c "python manage.py migrate && gunicorn hr_platform.wsgi:application --bind 0.0.0.0:8000 --workers 3"
+    env_file: .env
+    environment:
+      POSTGRES_HOST: db
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+
+  worker:
+    build: .
+    command: python manage.py run_delivery_worker --interval 15 --batch-size 50
+    env_file: .env
+    environment:
+      POSTGRES_HOST: db
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:

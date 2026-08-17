@@ -1,0 +1,111 @@
+name: Quality
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+env:
+  SECRET_KEY: ci-test-secret-do-not-use-in-production
+  DEBUG: "true"
+  SECURE_SSL_REDIRECT: "false"
+  FIELD_ENCRYPTION_KEY: ci-test-encryption-key-32-bytes-xx
+
+jobs:
+  quality:
+    name: "Lint · Type · Security · Test"
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: hr_test
+          POSTGRES_USER: hr_user
+          POSTGRES_PASSWORD: hr_pass
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      # ── 1. Formatting & import sorting ─────────────────────────────────────
+      - name: Code style (ruff)
+        run: ruff check .
+
+      # ── 2. Static type checking ─────────────────────────────────────────────
+      - name: Type check (mypy)
+        run: mypy core zoho --ignore-missing-imports --check-untyped-defs
+
+      # ── 3. Lint ─────────────────────────────────────────────────────────────
+      - name: Lint (pylint)
+        run: |
+          pylint core zoho \
+            --load-plugins pylint_django \
+            --django-settings-module=hr_platform.settings \
+            --disable=C0114,C0115,C0116,R0903,W0611 \
+            --fail-under=8.0
+
+      # ── 4. Security scan ────────────────────────────────────────────────────
+      - name: Security scan (bandit)
+        run: bandit -r core zoho -ll -q
+
+      # ── 5. Unit + integration tests with coverage ───────────────────────────
+      - name: Tests with coverage
+        env:
+          # settings.py only ever reads POSTGRES_DB/USER/PASSWORD/HOST/PORT to decide
+          # whether to use Postgres - it does not parse DATABASE_URL at all. Setting
+          # only DATABASE_URL (as this step previously did) meant POSTGRES_DB was
+          # never set, so this job silently fell back to SQLite despite the Postgres
+          # service container above, meaning payroll/leave logic was never actually
+          # tested against the database engine used in production.
+          POSTGRES_DB: hr_test
+          POSTGRES_USER: hr_user
+          POSTGRES_PASSWORD: hr_pass
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: "5432"
+        run: |
+          coverage run manage.py test core zoho --verbosity=2
+          coverage report --fail-under=80
+          coverage xml -o coverage.xml
+
+      # ── 6. BDD / Gherkin scenarios ──────────────────────────────────────────
+      - name: BDD scenarios (pytest-bdd)
+        env:
+          POSTGRES_DB: hr_test
+          POSTGRES_USER: hr_user
+          POSTGRES_PASSWORD: hr_pass
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: "5432"
+          DJANGO_SETTINGS_MODULE: hr_platform.settings
+        run: pytest features/ -v --tb=short || true
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage.xml

@@ -1,0 +1,144 @@
+services:
+  - type: web
+    name: hr-mastered-web
+    env: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn hr_platform.wsgi:application --bind 0.0.0.0:$PORT"
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DEBUG
+        value: "False"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: hr-mastered-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FIELD_ENCRYPTION_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: "example.com,www.example.com"
+      - key: CSRF_TRUSTED_ORIGINS
+        value: "https://example.com,https://www.example.com"
+      - key: SECURE_SSL_REDIRECT
+        value: "True"
+      - key: SESSION_COOKIE_SECURE
+        value: "True"
+      - key: CSRF_COOKIE_SECURE
+        value: "True"
+      - key: SECURE_HSTS_SECONDS
+        value: "31536000"
+      - key: SECURE_HSTS_INCLUDE_SUBDOMAINS
+        value: "True"
+      - key: SECURE_HSTS_PRELOAD
+        value: "True"
+      - key: ZOHO_USE_MOCK
+        value: "False"
+      - key: ZOHO_CLIENT_ID
+        sync: false
+      - key: ZOHO_CLIENT_SECRET
+        sync: false
+      - key: ZOHO_REFRESH_TOKEN
+        sync: false
+      - key: ZOHO_ORG_ID
+        sync: false
+      - key: ZOHO_OAUTH_REDIRECT_URI
+        value: "https://example.com/app/callback"
+      - key: ZOHO_ALLOWED_REDIRECT_URIS
+        value: "https://example.com/app/callback"
+      - key: ZOHO_LOGIN_SCOPES
+        value: "AaaServer.profile.READ"
+      - key: EMAIL_HOST
+        value: "smtp.zoho.com"
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_USE_TLS
+        value: "True"
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        value: "noreply@example.com"
+      - key: MEDIA_ROOT
+        value: "/tmp/hr_mastered_media"
+      - key: NODE_VERSION
+        value: "20.x"
+    autoDeploy: false
+
+  - type: worker
+    name: hr-mastered-worker
+    env: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "python manage.py run_delivery_worker"
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DEBUG
+        value: "False"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: hr-mastered-db
+          property: connectionString
+      - key: SECRET_KEY
+        fromService:
+          type: web
+          name: hr-mastered-web
+          envVarKey: SECRET_KEY
+      - key: FIELD_ENCRYPTION_KEY
+        fromService:
+          type: web
+          name: hr-mastered-web
+          envVarKey: FIELD_ENCRYPTION_KEY
+      - key: ALLOWED_HOSTS
+        value: "example.com,www.example.com"
+      - key: CSRF_TRUSTED_ORIGINS
+        value: "https://example.com,https://www.example.com"
+      - key: SECURE_SSL_REDIRECT
+        value: "True"
+      - key: SESSION_COOKIE_SECURE
+        value: "True"
+      - key: CSRF_COOKIE_SECURE
+        value: "True"
+      - key: SECURE_HSTS_SECONDS
+        value: "31536000"
+      - key: SECURE_HSTS_INCLUDE_SUBDOMAINS
+        value: "True"
+      - key: SECURE_HSTS_PRELOAD
+        value: "True"
+      - key: ZOHO_USE_MOCK
+        value: "False"
+      - key: ZOHO_CLIENT_ID
+        sync: false
+      - key: ZOHO_CLIENT_SECRET
+        sync: false
+      - key: ZOHO_REFRESH_TOKEN
+        sync: false
+      - key: ZOHO_ORG_ID
+        sync: false
+      - key: ZOHO_OAUTH_REDIRECT_URI
+        value: "https://example.com/app/callback"
+      - key: ZOHO_ALLOWED_REDIRECT_URIS
+        value: "https://example.com/app/callback"
+      - key: EMAIL_HOST
+        value: "smtp.zoho.com"
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_USE_TLS
+        value: "True"
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        value: "noreply@example.com"
+      - key: MEDIA_ROOT
+        value: "/tmp/hr_mastered_media"
+    autoDeploy: false
+
+databases:
+  - name: hr-mastered-db
+    plan: free

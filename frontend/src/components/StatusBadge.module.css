@@ -1,0 +1,17 @@
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.draft { background: hsl(225 15% 25%); color: var(--color-text-muted); }
+.info { background: hsl(225 70% 60% / 0.2); color: hsl(225 70% 75%); }
+.success { background: hsl(142 70% 45% / 0.2); color: var(--color-success); }
+.warning { background: hsl(38 90% 55% / 0.2); color: var(--color-warning); }
+.danger { background: hsl(0 72% 55% / 0.2); color: var(--color-danger); }
+.pending { background: hsl(225 15% 30%); color: var(--color-text-muted); }
+.muted { background: hsl(222 15% 20%); color: var(--color-text-muted); }

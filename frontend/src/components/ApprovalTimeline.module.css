@@ -1,0 +1,86 @@
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem 0;
+}
+
+.node {
+  display: flex;
+  position: relative;
+  gap: 1rem;
+}
+
+.dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  position: relative;
+  z-index: 2;
+  margin-top: 4px;
+}
+
+.pending {
+  background: var(--color-text-muted);
+}
+
+.approved {
+  background: var(--color-success);
+}
+
+.rejected {
+  background: var(--color-danger);
+}
+
+.pulse {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  animation: pulseAnim 1.5s infinite;
+  box-shadow: 0 0 0 0 var(--color-text-muted);
+}
+
+@keyframes pulseAnim {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); }
+  70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+}
+
+.line {
+  position: absolute;
+  left: 7.5px;
+  top: 20px;
+  bottom: -1.5rem;
+  width: 2px;
+  background: var(--color-border);
+  z-index: 1;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stage {
+  font-weight: 600;
+}
+
+.status {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.date {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.reason {
+  font-size: 0.875rem;
+  font-style: italic;
+  margin-top: 0.5rem;
+}

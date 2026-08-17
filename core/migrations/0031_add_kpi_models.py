@@ -1,0 +1,130 @@
+"""Add KPI models: categories, templates, frameworks, cycles, assignments, measurements."""
+from django.db import migrations, models
+import django.db.models.deletion
+import uuid
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ('core', '0030_add_leave_approval_policy_and_delegation'),
+    ]
+
+    operations = [
+        migrations.CreateModel(
+            name='KpiCategory',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('uuid', models.UUIDField(default=uuid.uuid4, unique=True, editable=False)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('updated_at', models.DateTimeField(auto_now=True)),
+                ('deleted_at', models.DateTimeField(blank=True, null=True)),
+                ('name', models.CharField(max_length=150)),
+                ('description', models.TextField(blank=True)),
+                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='kpicategory_records', to='core.company')),
+                ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='kpicategory_created_by', to='core.employee')),
+                ('updated_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='kpicategory_updated_by', to='core.employee')),
+            ],
+            options={'db_table': 'kpi_categories'},
+        ),
+        migrations.CreateModel(
+            name='KpiTemplate',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('uuid', models.UUIDField(default=uuid.uuid4, unique=True, editable=False)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('updated_at', models.DateTimeField(auto_now=True)),
+                ('deleted_at', models.DateTimeField(blank=True, null=True)),
+                ('name', models.CharField(max_length=200)),
+                ('description', models.TextField(blank=True)),
+                ('measurement_type', models.CharField(default='NUMERIC', max_length=20)),
+                ('direction', models.CharField(default='HIGHER', max_length=20)),
+                ('default_target', models.CharField(max_length=100, blank=True)),
+                ('default_weight', models.DecimalField(max_digits=5, decimal_places=2, default=0)),
+                ('frequency', models.CharField(max_length=50, blank=True)),
+                ('data_source', models.CharField(max_length=255, blank=True)),
+                ('scoring_method', models.CharField(max_length=100, blank=True)),
+                ('active', models.BooleanField(default=True)),
+                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='kpitemplate_records', to='core.company')),
+                ('category', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='templates', to='core.kpicategory')),
+                ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='kpitemplate_created_by', to='core.employee')),
+                ('updated_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='kpitemplate_updated_by', to='core.employee')),
+            ],
+            options={'db_table': 'kpi_templates'},
+        ),
+        migrations.CreateModel(
+            name='KpiFramework',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('uuid', models.UUIDField(default=uuid.uuid4, unique=True, editable=False)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('updated_at', models.DateTimeField(auto_now=True)),
+                ('deleted_at', models.DateTimeField(blank=True, null=True)),
+                ('name', models.CharField(max_length=200)),
+                ('scope_type', models.CharField(max_length=20)),
+                ('position', models.CharField(max_length=150, blank=True)),
+                ('configuration', models.JSONField(default=dict, blank=True)),
+                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='kpiframework_records', to='core.company')),
+                ('org_unit', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.orgunit')),
+                ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='kpiframework_created_by', to='core.employee')),
+                ('updated_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='kpiframework_updated_by', to='core.employee')),
+            ],
+            options={'db_table': 'kpi_frameworks'},
+        ),
+        migrations.CreateModel(
+            name='PerformanceCycle',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('uuid', models.UUIDField(default=uuid.uuid4, unique=True, editable=False)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('updated_at', models.DateTimeField(auto_now=True)),
+                ('deleted_at', models.DateTimeField(blank=True, null=True)),
+                ('name', models.CharField(max_length=200)),
+                ('start_date', models.DateField()),
+                ('end_date', models.DateField()),
+                ('review_deadline', models.DateField(blank=True, null=True)),
+                ('locked', models.BooleanField(default=False)),
+                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='performancecycle_records', to='core.company')),
+                ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='performancecycle_created_by', to='core.employee')),
+                ('updated_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='performancecycle_updated_by', to='core.employee')),
+            ],
+            options={'db_table': 'performance_cycles'},
+        ),
+        migrations.CreateModel(
+            name='EmployeeKpiAssignment',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('uuid', models.UUIDField(default=uuid.uuid4, unique=True, editable=False)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('updated_at', models.DateTimeField(auto_now=True)),
+                ('deleted_at', models.DateTimeField(blank=True, null=True)),
+                ('target', models.CharField(max_length=100, blank=True)),
+                ('weight', models.DecimalField(max_digits=5, decimal_places=2, default=0)),
+                ('source', models.JSONField(default=dict, blank=True)),
+                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='employeekpiassignment_records', to='core.company')),
+                ('cycle', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='assignments', to='core.performancecycle')),
+                ('employee', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='kpi_assignments', to='core.employee')),
+                ('template', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.kpitemplate')),
+                ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='employeekpiassignment_created_by', to='core.employee')),
+                ('updated_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='employeekpiassignment_updated_by', to='core.employee')),
+            ],
+            options={'db_table': 'employee_kpi_assignments'},
+        ),
+        migrations.CreateModel(
+            name='KpiMeasurement',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('uuid', models.UUIDField(default=uuid.uuid4, unique=True, editable=False)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('updated_at', models.DateTimeField(auto_now=True)),
+                ('deleted_at', models.DateTimeField(blank=True, null=True)),
+                ('measured_at', models.DateTimeField(auto_now_add=True)),
+                ('value', models.CharField(max_length=200)),
+                ('notes', models.TextField(blank=True)),
+                ('company', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='kpimeasurement_records', to='core.company')),
+                ('assignment', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='measurements', to='core.employeekpiassignment')),
+                ('recorded_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.employee')),
+            ],
+            options={'db_table': 'kpi_measurements'},
+        ),
+    ]

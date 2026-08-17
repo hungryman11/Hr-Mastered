@@ -1,0 +1,89 @@
+import secrets
+
+from django.conf import settings
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render
+
+from zoho.services import get_zoho_config
+
+
+def home_view(request):
+    config = get_zoho_config()
+    return render(request, 'home.html', {
+        'mock_mode': config.get('use_mock', False),
+    })
+
+
+def zoho_demo_view(request):
+    config = get_zoho_config()
+    return JsonResponse({
+        "mock_mode": config.get("use_mock", False),
+    })
+
+
+def zoho_oauth_callback_view(request):
+    return HttpResponse('<h1>OAuth callback</h1><p>Please complete sign-in through the HR platform.</p>')
+
+
+from django.contrib.auth import login
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework import status
+from zoho.services import ZohoAuthService, validate_redirect_uri
+from core.serializers import EmployeeSerializer
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def zoho_login_url_api_view(request):
+    redirect_uri = request.query_params.get('redirect_uri') or settings.ZOHO_OAUTH_REDIRECT_URI
+    try:
+        validated_redirect_uri = validate_redirect_uri(redirect_uri)
+    except ValueError as exc:
+        return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+    state = secrets.token_urlsafe(32)
+    request.session['zoho_oauth_state'] = state
+    request.session['zoho_oauth_redirect_uri'] = validated_redirect_uri
+    request.session.set_expiry(600)
+    login_url = ZohoAuthService.get_authorization_url(validated_redirect_uri, state)
+    return Response({'login_url': login_url, 'redirect_uri': validated_redirect_uri}, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def zoho_oauth_login_callback_api_view(request):
+    code = request.query_params.get('code')
+    state = request.query_params.get('state')
+    redirect_uri = request.query_params.get('redirect_uri')
+    expected_state = request.session.pop('zoho_oauth_state', None)
+    expected_redirect_uri = request.session.pop('zoho_oauth_redirect_uri', None)
+    if not code:
+        return Response({'detail': 'Authorization code is required.'}, status=status.HTTP_400_BAD_REQUEST)
+    if not state:
+        return Response({'detail': 'Invalid or expired OAuth login state.'}, status=status.HTTP_400_BAD_REQUEST)
+    if not expected_state or not secrets.compare_digest(state, expected_state):
+        return Response({'detail': 'Invalid or expired OAuth login state.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        validated_redirect_uri = validate_redirect_uri(redirect_uri, default=expected_redirect_uri or settings.ZOHO_OAUTH_REDIRECT_URI)
+    except ValueError as exc:
+        return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+    if expected_redirect_uri and validated_redirect_uri != expected_redirect_uri:
+        return Response({'detail': 'Redirect URI does not match the login request.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        profile = ZohoAuthService.exchange_code_for_user_profile(code, validated_redirect_uri)
+        employee = ZohoAuthService.authenticate_existing_user(profile)
+        employee.backend = (settings.AUTHENTICATION_BACKENDS[0]
+                            if getattr(settings, 'AUTHENTICATION_BACKENDS', None)
+                            else 'django.contrib.auth.backends.ModelBackend')
+        login(request, employee)
+        return Response({
+            'detail': 'Successfully logged in with Zoho Mail.',
+            'employee': EmployeeSerializer(employee, context={'request': request}).data,
+        }, status=status.HTTP_200_OK)
+    except Exception:
+        return Response({'detail': 'Zoho login could not be completed.'}, status=status.HTTP_400_BAD_REQUEST)
